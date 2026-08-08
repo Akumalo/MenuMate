@@ -1,0 +1,1043 @@
+openapi: 3.0.3
+
+info:
+  title: 献立アプリ API
+  description: 献立管理アプリのAPI仕様書
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: Local server
+
+tags:
+  - name: Auth
+    description: 認証・ユーザー情報
+  - name: Home
+    description: ホーム
+  - name: Recipe
+    description: レシピ
+  - name: Category
+    description: カテゴリ
+  - name: MealPlan
+    description: 献立
+  - name: Shopping
+    description: 買い物リスト
+
+security:
+  - bearerAuth: []
+
+paths:
+  # =========================================================
+  # Auth
+  # =========================================================
+
+  /api/v1/auth/me:
+    get:
+      tags:
+        - Auth
+      summary: ログインユーザー取得
+      description: 現在ログインしているユーザーの情報を取得する
+      responses:
+        "200":
+          description: 正常
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: 認証エラー
+        "500":
+          description: サーバーエラー
+
+  # =========================================================
+  # Home
+  # =========================================================
+
+  /api/v1/home:
+    get:
+      tags:
+        - Home
+      summary: ホーム情報取得
+      description: ホーム画面に必要な献立・買い物情報を取得する
+
+      parameters:
+        - name: date
+          in: query
+          required: false
+          description: 対象日（YYYY-MM-DD）
+          schema:
+            type: string
+            format: date
+          example: 2026-08-08
+
+      responses:
+        "200":
+          description: 正常
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HomeResponse"
+        "401":
+          description: 認証エラー
+        "500":
+          description: サーバーエラー
+
+  # =========================================================
+  # Recipe
+  # =========================================================
+
+  /api/v1/recipes:
+    get:
+      tags:
+        - Recipe
+      summary: レシピ一覧取得
+      description: 条件に一致するレシピ一覧を取得する
+
+      parameters:
+        - name: keyword
+          in: query
+          required: false
+          description: レシピ名検索キーワード
+          schema:
+            type: string
+
+        - name: categoryId
+          in: query
+          required: false
+          description: カテゴリID
+          schema:
+            type: integer
+
+        - name: favorite
+          in: query
+          required: false
+          description: お気に入りのみ取得
+          schema:
+            type: boolean
+
+        - name: page
+          in: query
+          required: false
+          description: ページ番号
+          schema:
+            type: integer
+            default: 1
+
+        - name: size
+          in: query
+          required: false
+          description: 1ページあたりの取得件数
+          schema:
+            type: integer
+            default: 20
+
+      responses:
+        "200":
+          description: 正常
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecipeListResponse"
+        "400":
+          description: リクエスト不正
+        "401":
+          description: 認証エラー
+        "500":
+          description: サーバーエラー
+
+    post:
+      tags:
+        - Recipe
+      summary: レシピ登録
+      description: 新しいレシピを登録する
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecipeRequest"
+
+      responses:
+        "201":
+          description: 登録成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecipeMutationResponse"
+        "400":
+          description: リクエスト不正
+        "401":
+          description: 認証エラー
+        "409":
+          description: 登録競合
+        "500":
+          description: サーバーエラー
+
+  /api/v1/recipes/{recipeId}:
+    get:
+      tags:
+        - Recipe
+      summary: レシピ詳細取得
+      description: 指定したレシピの詳細情報を取得する
+
+      parameters:
+        - $ref: "#/components/parameters/RecipeId"
+
+      responses:
+        "200":
+          description: 正常
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecipeDetail"
+        "400":
+          description: リクエスト不正
+        "401":
+          description: 認証エラー
+        "404":
+          description: レシピが存在しない
+        "500":
+          description: サーバーエラー
+
+    put:
+      tags:
+        - Recipe
+      summary: レシピ更新
+      description: 指定したレシピの情報を更新する
+
+      parameters:
+        - $ref: "#/components/parameters/RecipeId"
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecipeRequest"
+
+      responses:
+        "200":
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecipeMutationResponse"
+        "400":
+          description: リクエスト不正
+        "401":
+          description: 認証エラー
+        "404":
+          description: レシピが存在しない
+        "500":
+          description: サーバーエラー
+
+    delete:
+      tags:
+        - Recipe
+      summary: レシピ削除
+      description: 指定したレシピを削除する
+
+      parameters:
+        - $ref: "#/components/parameters/RecipeId"
+
+      responses:
+        "200":
+          description: 削除成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecipeMutationResponse"
+        "400":
+          description: リクエスト不正
+        "401":
+          description: 認証エラー
+        "404":
+          description: レシピが存在しない
+        "409":
+          description: 献立で使用中のため削除できない
+        "500":
+          description: サーバーエラー
+
+  /api/v1/recipes/{recipeId}/favorite:
+    patch:
+      tags:
+        - Recipe
+      summary: レシピお気に入り更新
+      description: 指定したレシピのお気に入り状態を更新する
+
+      parameters:
+        - $ref: "#/components/parameters/RecipeId"
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - favorite
+              properties:
+                favorite:
+                  type: boolean
+                  description: お気に入り状態
+
+      responses:
+        "200":
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FavoriteResponse"
+        "400":
+          description: リクエスト不正
+        "401":
+          description: 認証エラー
+        "404":
+          description: レシピが存在しない
+        "500":
+          description: サーバーエラー
+
+  # =========================================================
+  # Category
+  # =========================================================
+
+  /api/v1/categories:
+    get:
+      tags:
+        - Category
+      summary: カテゴリ一覧取得
+      description: 初期カテゴリおよびユーザーカテゴリの一覧を取得する
+
+      responses:
+        "200":
+          description: 正常
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategoryListResponse"
+        "401":
+          description: 認証エラー
+        "500":
+          description: サーバーエラー
+
+    post:
+      tags:
+        - Category
+      summary: カテゴリ登録
+      description: ログインユーザーが独自のカテゴリを登録する
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryRequest"
+
+      responses:
+        "201":
+          description: 登録成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategoryMutationResponse"
+        "400":
+          description: リクエスト不正
+        "401":
+          description: 認証エラー
+        "409":
+          description: 同名カテゴリが存在する
+        "500":
+          description: サーバーエラー
+
+  /api/v1/categories/{categoryId}:
+    put:
+      tags:
+        - Category
+      summary: カテゴリ更新
+      description: ログインユーザーが登録したカテゴリを更新する
+
+      parameters:
+        - $ref: "#/components/parameters/CategoryId"
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryRequest"
+
+      responses:
+        "200":
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategoryMutationResponse"
+        "400":
+          description: リクエスト不正
+        "401":
+          description: 認証エラー
+        "404":
+          description: カテゴリが存在しない
+        "409":
+          description: 同名カテゴリが存在する
+        "500":
+          description: サーバーエラー
+
+    delete:
+      tags:
+        - Category
+      summary: カテゴリ削除
+      description: ログインユーザーが登録したカテゴリを削除する
+
+      parameters:
+        - $ref: "#/components/parameters/CategoryId"
+
+      responses:
+        "200":
+          description: 削除成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategoryMutationResponse"
+        "400":
+          description: リクエスト不正
+        "401":
+          description: 認証エラー
+        "404":
+          description: カテゴリが存在しない
+        "409":
+          description: レシピで使用中のため削除できない
+        "500":
+          description: サーバーエラー
+
+  # =========================================================
+  # MealPlan
+  # =========================================================
+
+  /api/v1/meal-plans:
+    get:
+      tags:
+        - MealPlan
+      summary: 献立一覧取得
+      description: 指定日の朝・昼・夜の献立を取得する
+
+      parameters:
+        - name: date
+          in: query
+          required: true
+          description: 対象日（YYYY-MM-DD）
+          schema:
+            type: string
+            format: date
+          example: 2026-08-08
+
+      responses:
+        "200":
+          description: 正常
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MealPlanListResponse"
+        "400":
+          description: リクエスト不正
+        "401":
+          description: 認証エラー
+        "500":
+          description: サーバーエラー
+
+    put:
+      tags:
+        - MealPlan
+      summary: 献立登録・更新
+      description: 指定日の献立を登録または更新する（Upsert）
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MealPlanUpsertRequest"
+
+      responses:
+        "200":
+          description: 登録・更新成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MealPlanResponse"
+        "400":
+          description: リクエスト不正
+        "401":
+          description: 認証エラー
+        "404":
+          description: 指定したレシピが存在しない
+        "500":
+          description: サーバーエラー
+
+  /api/v1/meal-plans/{mealPlanId}:
+    delete:
+      tags:
+        - MealPlan
+      summary: 献立削除
+      description: 指定した献立を削除する
+
+      parameters:
+        - $ref: "#/components/parameters/MealPlanId"
+
+      responses:
+        "200":
+          description: 削除成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MealPlanDeleteResponse"
+        "400":
+          description: リクエスト不正
+        "401":
+          description: 認証エラー
+        "404":
+          description: 献立が存在しない
+        "500":
+          description: サーバーエラー
+
+  # =========================================================
+  # Shopping
+  # =========================================================
+
+  /api/v1/shopping:
+    get:
+      tags:
+        - Shopping
+      summary: 買い物リスト取得
+      description: ログインユーザーの買い物リストを取得する
+
+      responses:
+        "200":
+          description: 正常
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShoppingListResponse"
+        "401":
+          description: 認証エラー
+        "500":
+          description: サーバーエラー
+
+  /api/v1/shopping/{shoppingItemId}:
+    put:
+      tags:
+        - Shopping
+      summary: 買い物リスト更新
+      description: 指定した買い物項目の購入済み状態を更新する
+
+      parameters:
+        - $ref: "#/components/parameters/ShoppingItemId"
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - checked
+              properties:
+                checked:
+                  type: boolean
+                  description: 購入済みフラグ
+
+      responses:
+        "200":
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShoppingUpdateResponse"
+        "400":
+          description: リクエスト不正
+        "401":
+          description: 認証エラー
+        "404":
+          description: 買い物項目が存在しない
+        "500":
+          description: サーバーエラー
+
+  /api/v1/shopping/regenerate:
+    post:
+      tags:
+        - Shopping
+      summary: 買い物リスト再生成
+      description: 指定期間の献立から買い物リストを再生成する
+
+      parameters:
+        - name: startDate
+          in: query
+          required: true
+          description: 対象期間の開始日
+          schema:
+            type: string
+            format: date
+          example: 2026-08-08
+
+        - name: endDate
+          in: query
+          required: true
+          description: 対象期間の終了日
+          schema:
+            type: string
+            format: date
+          example: 2026-08-14
+
+      responses:
+        "200":
+          description: 再生成成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShoppingListResponse"
+        "400":
+          description: リクエスト不正
+        "401":
+          description: 認証エラー
+        "404":
+          description: 対象期間に献立が存在しない
+        "500":
+          description: サーバーエラー
+
+# =========================================================
+# Components
+# =========================================================
+
+components:
+  # -------------------------------------------------------
+  # Security
+  # -------------------------------------------------------
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  # -------------------------------------------------------
+  # Parameters
+  # -------------------------------------------------------
+
+  parameters:
+    RecipeId:
+      name: recipeId
+      in: path
+      required: true
+      description: レシピID
+      schema:
+        type: integer
+
+    CategoryId:
+      name: categoryId
+      in: path
+      required: true
+      description: カテゴリID
+      schema:
+        type: integer
+
+    MealPlanId:
+      name: mealPlanId
+      in: path
+      required: true
+      description: 献立ID
+      schema:
+        type: integer
+
+    ShoppingItemId:
+      name: shoppingItemId
+      in: path
+      required: true
+      description: 買い物項目ID
+      schema:
+        type: integer
+
+  # -------------------------------------------------------
+  # Schemas
+  # -------------------------------------------------------
+
+  schemas:
+    # =====================================================
+    # User
+    # =====================================================
+
+    User:
+      type: object
+      required:
+        - userId
+        - userName
+        - email
+      properties:
+        userId:
+          type: integer
+          description: ユーザーID
+        userName:
+          type: string
+          description: ユーザー名
+        email:
+          type: string
+          format: email
+          description: メールアドレス
+
+    # =====================================================
+    # Home
+    # =====================================================
+
+    HomeResponse:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+          description: 対象日
+
+        meals:
+          type: object
+          properties:
+            breakfast:
+              $ref: "#/components/schemas/MealSummary"
+            lunch:
+              $ref: "#/components/schemas/MealSummary"
+            dinner:
+              $ref: "#/components/schemas/MealSummary"
+
+        shopping:
+          type: object
+          properties:
+            totalCount:
+              type: integer
+              description: 買い物総数
+            uncheckedCount:
+              type: integer
+              description: 未購入件数
+
+    MealSummary:
+      type: object
+      nullable: true
+      properties:
+        recipeId:
+          type: integer
+        recipeName:
+          type: string
+        imageUrl:
+          type: string
+        category:
+          type: string
+        favorite:
+          type: boolean
+
+    # =====================================================
+    # Recipe
+    # =====================================================
+
+    RecipeListResponse:
+      type: object
+      properties:
+        totalCount:
+          type: integer
+        page:
+          type: integer
+        size:
+          type: integer
+        recipes:
+          type: array
+          items:
+            $ref: "#/components/schemas/RecipeListItem"
+
+    RecipeListItem:
+      type: object
+      properties:
+        recipeId:
+          type: integer
+        recipeName:
+          type: string
+        categoryId:
+          type: integer
+        categoryName:
+          type: string
+        imageUrl:
+          type: string
+        favorite:
+          type: boolean
+
+    RecipeDetail:
+      type: object
+      properties:
+        recipeId:
+          type: integer
+        recipeName:
+          type: string
+        categoryId:
+          type: integer
+        categoryName:
+          type: string
+        imageUrl:
+          type: string
+        cookingTime:
+          type: integer
+        servings:
+          type: integer
+        favorite:
+          type: boolean
+        ingredients:
+          type: array
+          items:
+            $ref: "#/components/schemas/Ingredient"
+        steps:
+          type: array
+          items:
+            $ref: "#/components/schemas/RecipeStep"
+
+    RecipeRequest:
+      type: object
+      required:
+        - recipeName
+        - categoryId
+        - cookingTime
+        - servings
+        - ingredients
+        - steps
+      properties:
+        recipeName:
+          type: string
+        categoryId:
+          type: integer
+        imageUrl:
+          type: string
+        cookingTime:
+          type: integer
+        servings:
+          type: integer
+        ingredients:
+          type: array
+          items:
+            $ref: "#/components/schemas/IngredientRequest"
+        steps:
+          type: array
+          items:
+            $ref: "#/components/schemas/RecipeStepRequest"
+
+    Ingredient:
+      type: object
+      properties:
+        name:
+          type: string
+        amount:
+          type: string
+
+    IngredientRequest:
+      type: object
+      required:
+        - name
+        - amount
+      properties:
+        name:
+          type: string
+        amount:
+          type: string
+
+    RecipeStep:
+      type: object
+      properties:
+        stepNo:
+          type: integer
+        description:
+          type: string
+
+    RecipeStepRequest:
+      type: object
+      required:
+        - stepNo
+        - description
+      properties:
+        stepNo:
+          type: integer
+        description:
+          type: string
+
+    RecipeMutationResponse:
+      type: object
+      properties:
+        recipeId:
+          type: integer
+        message:
+          type: string
+
+    FavoriteResponse:
+      type: object
+      properties:
+        recipeId:
+          type: integer
+        favorite:
+          type: boolean
+        message:
+          type: string
+
+    # =====================================================
+    # Category
+    # =====================================================
+
+    Category:
+      type: object
+      properties:
+        categoryId:
+          type: integer
+        categoryName:
+          type: string
+        type:
+          type: string
+          enum:
+            - default
+            - user
+
+    CategoryListResponse:
+      type: object
+      properties:
+        categories:
+          type: array
+          items:
+            $ref: "#/components/schemas/Category"
+
+    CategoryRequest:
+      type: object
+      required:
+        - categoryName
+      properties:
+        categoryName:
+          type: string
+
+    CategoryMutationResponse:
+      type: object
+      properties:
+        categoryId:
+          type: integer
+        categoryName:
+          type: string
+        type:
+          type: string
+        message:
+          type: string
+
+    # =====================================================
+    # MealPlan
+    # =====================================================
+
+    MealPlan:
+      type: object
+      properties:
+        mealPlanId:
+          type: integer
+        date:
+          type: string
+          format: date
+        mealType:
+          type: string
+          enum:
+            - breakfast
+            - lunch
+            - dinner
+        recipeId:
+          type: integer
+        recipeName:
+          type: string
+        imageUrl:
+          type: string
+
+    MealPlanListResponse:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        meals:
+          type: array
+          items:
+            $ref: "#/components/schemas/MealPlan"
+
+    MealPlanUpsertRequest:
+      type: object
+      required:
+        - date
+        - mealType
+        - recipeId
+      properties:
+        date:
+          type: string
+          format: date
+        mealType:
+          type: string
+          enum:
+            - breakfast
+            - lunch
+            - dinner
+        recipeId:
+          type: integer
+
+    MealPlanResponse:
+      type: object
+      properties:
+        mealPlanId:
+          type: integer
+        date:
+          type: string
+          format: date
+        mealType:
+          type: string
+        recipeId:
+          type: integer
+        message:
+          type: string
+
+    MealPlanDeleteResponse:
+      type: object
+      properties:
+        mealPlanId:
+          type: integer
+        message:
+          type: string
+
+    # =====================================================
+    # Shopping
+    # =====================================================
+
+    ShoppingItem:
+      type: object
+      properties:
+        shoppingItemId:
+          type: integer
+        ingredientName:
+          type: string
+        amount:
+          type: string
+        checked:
+          type: boolean
+        categoryName:
+          type: string
+
+    ShoppingListResponse:
+      type: object
+      properties:
+        totalCount:
+          type: integer
+        uncheckedCount:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ShoppingItem"
+
+    ShoppingUpdateResponse:
+      type: object
+      properties:
+        shoppingItemId:
+          type: integer
+        checked:
+          type: boolean
+        message:
+          type: string
