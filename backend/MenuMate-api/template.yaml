@@ -1,119 +1,244 @@
-AWSTemplateFormatVersion: 2010-09-09
-Description: >-
-  MenuMate-api
-Transform:
-- AWS::Serverless-2016-10-31
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: MenuMate Backend API
 
-# Resources declares the AWS resources that you want to include in the stack
-# https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resources-section-structure.html
-Resources:
-  # Each Lambda function is defined by properties:
-  # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
-
-  # This is a Lambda function config associated with the source code: get-all-items.js
-  getAllItemsFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: src/handlers/get-all-items.getAllItemsHandler
-      Runtime: nodejs22.x
-      Architectures:
-      - x86_64
-      MemorySize: 128
-      Timeout: 100
-      Description: A simple example includes a HTTP get method to get all items 
-        from a DynamoDB table.
-      Policies:
-        # Give Create/Read/Update/Delete Permissions to the SampleTable
-      - DynamoDBCrudPolicy:
-          TableName: !Ref SampleTable
-      Environment:
-        Variables:
-          # Make table name accessible as environment variable from function code during execution
-          SAMPLE_TABLE: !Ref SampleTable
-      Events:
-        Api:
-          Type: Api
-          Properties:
-            Path: /
-            Method: GET
-  # Each Lambda function is defined by properties:
-  # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
-
-  # This is a Lambda function config associated with the source code: get-by-id.js
-  getByIdFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: src/handlers/get-by-id.getByIdHandler
-      Runtime: nodejs22.x
-      Architectures:
-      - x86_64
-      MemorySize: 128
-      Timeout: 100
-      Description: A simple example includes a HTTP get method to get one item 
-        by id from a DynamoDB table.
-      Policies:
-        # Give Create/Read/Update/Delete Permissions to the SampleTable
-      - DynamoDBCrudPolicy:
-          TableName: !Ref SampleTable
-      Environment:
-        Variables:
-          # Make table name accessible as environment variable from function code during execution
-          SAMPLE_TABLE: !Ref SampleTable
-      Events:
-        Api:
-          Type: Api
-          Properties:
-            Path: /{id}
-            Method: GET
-  # Each Lambda function is defined by properties:
-  # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
-
-  # This is a Lambda function config associated with the source code: put-item.js
-  putItemFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: src/handlers/put-item.putItemHandler
-      Runtime: nodejs22.x
-      Architectures:
-      - x86_64
-      MemorySize: 128
-      Timeout: 100
-      Description: A simple example includes a HTTP post method to add one item 
-        to a DynamoDB table.
-      Policies:
-        # Give Create/Read/Update/Delete Permissions to the SampleTable
-      - DynamoDBCrudPolicy:
-          TableName: !Ref SampleTable
-      Environment:
-        Variables:
-          # Make table name accessible as environment variable from function code during execution
-          SAMPLE_TABLE: !Ref SampleTable
-      Events:
-        Api:
-          Type: Api
-          Properties:
-            Path: /
-            Method: POST
-  # Simple syntax to create a DynamoDB table with a single attribute primary key, more in
-  # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlesssimpletable
-
-  # DynamoDB table to store item: {id: &lt;ID&gt;, name: &lt;NAME&gt;}
-  SampleTable:
-    Type: AWS::Serverless::SimpleTable
-    Properties:
-      PrimaryKey:
-        Name: id
-        Type: String
-      ProvisionedThroughput:
-        ReadCapacityUnits: 2
-        WriteCapacityUnits: 2
-
-Outputs:
-  WebEndpoint:
-    Description: API Gateway endpoint URL for Prod stage
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/"
-# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
-    LoggingConfig:
-      LogFormat: JSON
+    Runtime: nodejs22.x
+    Architectures:
+      - x86_64
+    Timeout: 10
+    MemorySize: 256
+    Environment:
+      Variables:
+        NODE_ENV: development
+
+Resources:
+  # ========================================
+  # Home
+  # ========================================
+
+  GetHomeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: handlers/home/get-home.handler
+      Events:
+        GetHome:
+          Type: Api
+          Properties:
+            Path: /home
+            Method: get
+
+  # ========================================
+  # Recipe
+  # ========================================
+
+  GetRecipesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: handlers/recipe/get-recipes.handler
+      Events:
+        GetRecipes:
+          Type: Api
+          Properties:
+            Path: /recipes
+            Method: get
+
+  GetRecipeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: handlers/recipe/get-recipe.handler
+      Events:
+        GetRecipe:
+          Type: Api
+          Properties:
+            Path: /recipes/{recipeId}
+            Method: get
+
+  CreateRecipeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: handlers/recipe/create-recipe.handler
+      Events:
+        CreateRecipe:
+          Type: Api
+          Properties:
+            Path: /recipes
+            Method: post
+
+  UpdateRecipeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: handlers/recipe/update-recipe.handler
+      Events:
+        UpdateRecipe:
+          Type: Api
+          Properties:
+            Path: /recipes/{recipeId}
+            Method: put
+
+  DeleteRecipeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: handlers/recipe/delete-recipe.handler
+      Events:
+        DeleteRecipe:
+          Type: Api
+          Properties:
+            Path: /recipes/{recipeId}
+            Method: delete
+
+  UpdateRecipeFavoriteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: handlers/recipe/update-favorite.handler
+      Events:
+        UpdateRecipeFavorite:
+          Type: Api
+          Properties:
+            Path: /recipes/{recipeId}/favorite
+            Method: patch
+
+  # ========================================
+  # Category
+  # ========================================
+
+  GetCategoriesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: handlers/category/get-categories.handler
+      Events:
+        GetCategories:
+          Type: Api
+          Properties:
+            Path: /categories
+            Method: get
+
+  CreateCategoryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: handlers/category/create-category.handler
+      Events:
+        CreateCategory:
+          Type: Api
+          Properties:
+            Path: /categories
+            Method: post
+
+  UpdateCategoryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: handlers/category/update-category.handler
+      Events:
+        UpdateCategory:
+          Type: Api
+          Properties:
+            Path: /categories/{categoryId}
+            Method: put
+
+  DeleteCategoryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: handlers/category/delete-category.handler
+      Events:
+        DeleteCategory:
+          Type: Api
+          Properties:
+            Path: /categories/{categoryId}
+            Method: delete
+
+  # ========================================
+  # MealPlan
+  # ========================================
+
+  GetMealPlansFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: handlers/meal-plan/get-meal-plans.handler
+      Events:
+        GetMealPlans:
+          Type: Api
+          Properties:
+            Path: /meal-plans
+            Method: get
+
+  UpsertMealPlanFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: handlers/meal-plan/upsert-meal-plan.handler
+      Events:
+        UpsertMealPlan:
+          Type: Api
+          Properties:
+            Path: /meal-plans
+            Method: put
+
+  DeleteMealPlanFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: handlers/meal-plan/delete-meal-plan.handler
+      Events:
+        DeleteMealPlan:
+          Type: Api
+          Properties:
+            Path: /meal-plans/{mealPlanId}
+            Method: delete
+
+  # ========================================
+  # Shopping
+  # ========================================
+
+  GetShoppingFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: handlers/shopping/get-shopping.handler
+      Events:
+        GetShopping:
+          Type: Api
+          Properties:
+            Path: /shopping
+            Method: get
+
+  UpdateShoppingFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: handlers/shopping/update-shopping.handler
+      Events:
+        UpdateShopping:
+          Type: Api
+          Properties:
+            Path: /shopping
+            Method: put
+
+  RegenerateShoppingFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: handlers/shopping/regenerate-shopping.handler
+      Events:
+        RegenerateShopping:
+          Type: Api
+          Properties:
+            Path: /shopping/regenerate
+            Method: post
+
+Outputs:
+  ApiUrl:
+    Description: MenuMate API Gateway endpoint
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
