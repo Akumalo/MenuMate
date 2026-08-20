@@ -21,8 +21,24 @@ Resources:
   GetHomeFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
-      Handler: handlers/home/get-home.handler
+      CodeUri: ./
+      Handler: src/handlers/home/get-home.handler
+      Runtime: nodejs22.x
+
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MealPlansTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RecipesTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ShoppingListsTable
+
+      Environment:
+        Variables:
+          NODE_ENV: development
+          MEALPLAN_TABLE_NAME: !Ref MealPlansTable
+          RECIPES_TABLE_NAME: !Ref RecipesTable
+          SHOPPING_LISTS_TABLE_NAME: !Ref ShoppingListsTable
       Events:
         GetHome:
           Type: Api
@@ -37,8 +53,8 @@ Resources:
   GetRecipesFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
-      Handler: handlers/recipe/get-recipes.handler
+      CodeUri: ./
+      Handler: src/handlers/recipe/get-recipes.handler
       Events:
         GetRecipes:
           Type: Api
@@ -49,8 +65,8 @@ Resources:
   GetRecipeFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
-      Handler: handlers/recipe/get-recipe.handler
+      CodeUri: ./
+      Handler: src/handlers/recipe/get-recipe.handler
       Events:
         GetRecipe:
           Type: Api
@@ -61,8 +77,8 @@ Resources:
   CreateRecipeFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
-      Handler: handlers/recipe/create-recipe.handler
+      CodeUri: ./
+      Handler: src/handlers/recipe/create-recipe.handler
       Events:
         CreateRecipe:
           Type: Api
@@ -73,8 +89,8 @@ Resources:
   UpdateRecipeFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
-      Handler: handlers/recipe/update-recipe.handler
+      CodeUri: ./
+      Handler: src/handlers/recipe/update-recipe.handler
       Events:
         UpdateRecipe:
           Type: Api
@@ -85,8 +101,8 @@ Resources:
   DeleteRecipeFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
-      Handler: handlers/recipe/delete-recipe.handler
+      CodeUri: ./
+      Handler: src/handlers/recipe/delete-recipe.handler
       Events:
         DeleteRecipe:
           Type: Api
@@ -97,8 +113,8 @@ Resources:
   UpdateRecipeFavoriteFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
-      Handler: handlers/recipe/update-favorite.handler
+      CodeUri: ./
+      Handler: src/handlers/recipe/update-favorite.handler
       Events:
         UpdateRecipeFavorite:
           Type: Api
@@ -113,8 +129,8 @@ Resources:
   GetCategoriesFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
-      Handler: handlers/category/get-categories.handler
+      CodeUri: ./
+      Handler: src/handlers/category/get-categories.handler
       Events:
         GetCategories:
           Type: Api
@@ -125,8 +141,8 @@ Resources:
   CreateCategoryFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
-      Handler: handlers/category/create-category.handler
+      CodeUri: ./
+      Handler: src/handlers/category/create-category.handler
       Events:
         CreateCategory:
           Type: Api
@@ -137,8 +153,8 @@ Resources:
   UpdateCategoryFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
-      Handler: handlers/category/update-category.handler
+      CodeUri: ./
+      Handler: src/handlers/category/update-category.handler
       Events:
         UpdateCategory:
           Type: Api
@@ -149,8 +165,8 @@ Resources:
   DeleteCategoryFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
-      Handler: handlers/category/delete-category.handler
+      CodeUri: ./
+      Handler: src/handlers/category/delete-category.handler
       Events:
         DeleteCategory:
           Type: Api
@@ -165,8 +181,8 @@ Resources:
   GetMealPlansFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
-      Handler: handlers/meal-plan/get-meal-plans.handler
+      CodeUri: ./
+      Handler: src/handlers/meal-plan/get-meal-plans.handler
       Events:
         GetMealPlans:
           Type: Api
@@ -177,8 +193,8 @@ Resources:
   UpsertMealPlanFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
-      Handler: handlers/meal-plan/upsert-meal-plan.handler
+      CodeUri: ./
+      Handler: src/handlers/meal-plan/upsert-meal-plan.handler
       Events:
         UpsertMealPlan:
           Type: Api
@@ -189,8 +205,8 @@ Resources:
   DeleteMealPlanFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
-      Handler: handlers/meal-plan/delete-meal-plan.handler
+      CodeUri: ./
+      Handler: src/handlers/meal-plan/delete-meal-plan.handler
       Events:
         DeleteMealPlan:
           Type: Api
@@ -205,8 +221,8 @@ Resources:
   GetShoppingFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
-      Handler: handlers/shopping/get-shopping.handler
+      CodeUri: ./
+      Handler: src/handlers/shopping/get-shopping.handler
       Events:
         GetShopping:
           Type: Api
@@ -217,8 +233,8 @@ Resources:
   UpdateShoppingFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
-      Handler: handlers/shopping/update-shopping.handler
+      CodeUri: ./
+      Handler: src/handlers/shopping/update-shopping.handler
       Events:
         UpdateShopping:
           Type: Api
@@ -229,14 +245,119 @@ Resources:
   RegenerateShoppingFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
-      Handler: handlers/shopping/regenerate-shopping.handler
+      CodeUri: ./
+      Handler: src/handlers/shopping/regenerate-shopping.handler
       Events:
         RegenerateShopping:
           Type: Api
           Properties:
             Path: /shopping/regenerate
             Method: post
+
+  ## ========================================
+  # SampleTable
+  # ========================================
+  UsersTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: !Sub "${AWS::StackName}-Users"
+      BillingMode: PAY_PER_REQUEST
+      SSESpecification:
+        SSEEnabled: true
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+
+  RecipesTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: !Sub "${AWS::StackName}-Recipes"
+      BillingMode: PAY_PER_REQUEST
+      SSESpecification:
+        SSEEnabled: true
+      AttributeDefinitions:
+        - AttributeName: recipeId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: recipeId
+          KeyType: HASH
+
+  CategoriesTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: !Sub "${AWS::StackName}-Categories"
+      BillingMode: PAY_PER_REQUEST
+      SSESpecification:
+        SSEEnabled: true
+      AttributeDefinitions:
+        - AttributeName: categoryId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: categoryId
+          KeyType: HASH
+
+  MealPlansTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: !Sub "${AWS::StackName}-MealPlans"
+      BillingMode: PAY_PER_REQUEST
+      SSESpecification:
+        SSEEnabled: true
+      AttributeDefinitions:
+        - AttributeName: mealPlanId
+          AttributeType: S
+        - AttributeName: userId
+          AttributeType: S
+        - AttributeName: mealDate
+          AttributeType: S
+      KeySchema:
+        - AttributeName: mealPlanId
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: UserMealDateIndex
+          KeySchema:
+            - AttributeName: userId
+              KeyType: HASH
+            - AttributeName: mealDate
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+
+  ShoppingListsTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: !Sub "${AWS::StackName}-ShoppingLists"
+      BillingMode: PAY_PER_REQUEST
+      SSESpecification:
+        SSEEnabled: true
+      AttributeDefinitions:
+        - AttributeName: shoppingId
+          AttributeType: S
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: shoppingId
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: UserIndex
+          KeySchema:
+            - AttributeName: userId
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
 
 Outputs:
   ApiUrl:
