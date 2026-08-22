@@ -7,6 +7,9 @@ export async function getRecipes() {
   const comand = new ScanCommand({
     TableName: tableName,
   });
+
+  const result = await dynamoDb.send(comand);
+  return result.Items ?? [];
 }
 
 export async function getRecipeById(recipeId) {

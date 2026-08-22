@@ -55,6 +55,13 @@ Resources:
     Properties:
       CodeUri: ./
       Handler: src/handlers/recipe/get-recipes.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RecipesTable
+      Environment:
+        Variables:
+          NODE_ENV: development
+          RECIPES_TABLE_NAME: !Ref RecipesTable
       Events:
         GetRecipes:
           Type: Api
@@ -67,6 +74,13 @@ Resources:
     Properties:
       CodeUri: ./
       Handler: src/handlers/recipe/get-recipe.handler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref RecipesTable
+      Environment:
+        Variables:
+          NODE_ENV: development
+          RECIPES_TABLE_NAME: !Ref RecipesTable
       Events:
         GetRecipe:
           Type: Api
