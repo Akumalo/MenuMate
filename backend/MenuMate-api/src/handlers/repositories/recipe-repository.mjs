@@ -1,4 +1,4 @@
-import { GetCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
+import { GetCommand, PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
 import { dynamoDb } from "../../lib/dynamodb.mjs";
 
 const tableName = process.env.RECIPES_TABLE_NAME;
@@ -23,4 +23,16 @@ export async function getRecipeById(recipeId) {
   const result = await dynamoDb.send(command);
 
   return result.Item ?? null;
+}
+
+export async function createRecipe(recipe) {
+  const command = new PutCommand({
+    TableName: tableName,
+    Item: recipe,
+    ConditionExpression: "attribute_not_exists(recipeId)",
+  });
+
+  await dynamoDb.send(command);
+
+  return recipe;
 }
