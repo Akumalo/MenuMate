@@ -131,6 +131,13 @@ Resources:
     Properties:
       CodeUri: ./
       Handler: src/handlers/recipe/delete-recipe.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RecipesTable
+      Environment:
+        Variables:
+          NODE_ENV: development
+          RECIPES_TABLE_NAME: !Ref RecipesTable
       Events:
         DeleteRecipe:
           Type: Api

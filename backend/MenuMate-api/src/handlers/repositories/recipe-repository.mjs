@@ -3,6 +3,7 @@ import {
   PutCommand,
   ScanCommand,
   UpdateCommand,
+  DeleteCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { dynamoDb } from "../../lib/dynamodb.mjs";
 
@@ -87,6 +88,29 @@ export async function updateRecipe(recipeId, recipe) {
   }
 
   const command = new UpdateCommand(params);
+
+  try {
+    const result = await dynamoDb.send(command);
+
+    return result.Attributes ?? null;
+  } catch (error) {
+    if (error.name === "ConditionalCheckFailedException") {
+      return null;
+    }
+
+    throw error;
+  }
+}
+
+export async function deleteRecipe(recipeId) {
+  const command = new DeleteCommand({
+    TableName: tableName,
+    Key: {
+      recipeId,
+    },
+    ConditionExpression: "attribute_exists(recipeId)",
+    ReturnValues: "ALL_OLD",
+  });
 
   try {
     const result = await dynamoDb.send(command);
