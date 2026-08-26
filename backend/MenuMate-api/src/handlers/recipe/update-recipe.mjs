@@ -10,7 +10,7 @@ export const handler = async (event) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message: "reciped is required" }),
+        body: JSON.stringify({ message: "recipeId is required" }),
       };
     }
 
@@ -50,7 +50,7 @@ export const handler = async (event) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message: "At least one field is request" }),
+        body: JSON.stringify({ message: "At least one field is required" }),
       };
     }
 
@@ -62,7 +62,7 @@ export const handler = async (event) => {
 
     if (!recipe) {
       return {
-        statusCode: 400,
+        statusCode: 404,
         headers: {
           "Content-Type": "application/json",
         },
