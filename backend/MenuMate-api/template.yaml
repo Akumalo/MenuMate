@@ -145,18 +145,6 @@ Resources:
             Path: /recipes/{recipeId}
             Method: delete
 
-  UpdateRecipeFavoriteFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: ./
-      Handler: src/handlers/recipe/update-favorite.handler
-      Events:
-        UpdateRecipeFavorite:
-          Type: Api
-          Properties:
-            Path: /recipes/{recipeId}/favorite
-            Method: patch
-
   # ========================================
   # Category
   # ========================================

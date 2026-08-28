@@ -10,11 +10,11 @@ import { dynamoDb } from "../../lib/dynamodb.mjs";
 const tableName = process.env.RECIPES_TABLE_NAME;
 
 export async function getRecipes() {
-  const comand = new ScanCommand({
+  const command = new ScanCommand({
     TableName: tableName,
   });
 
-  const result = await dynamoDb.send(comand);
+  const result = await dynamoDb.send(command);
   return result.Items ?? [];
 }
 
