@@ -259,45 +259,6 @@ paths:
         "500":
           description: サーバーエラー
 
-  /api/v1/recipes/{recipeId}/favorite:
-    patch:
-      tags:
-        - Recipe
-      summary: レシピお気に入り更新
-      description: 指定したレシピのお気に入り状態を更新する
-
-      parameters:
-        - $ref: "#/components/parameters/RecipeId"
-
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - favorite
-              properties:
-                favorite:
-                  type: boolean
-                  description: お気に入り状態
-
-      responses:
-        "200":
-          description: 更新成功
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/FavoriteResponse"
-        "400":
-          description: リクエスト不正
-        "401":
-          description: 認証エラー
-        "404":
-          description: レシピが存在しない
-        "500":
-          description: サーバーエラー
-
   # =========================================================
   # Category
   # =========================================================
