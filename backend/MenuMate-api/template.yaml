@@ -1,0 +1,388 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: MenuMate Backend API
+
+Globals:
+  Function:
+    Runtime: nodejs22.x
+    Architectures:
+      - x86_64
+    Timeout: 10
+    MemorySize: 256
+    Environment:
+      Variables:
+        NODE_ENV: development
+
+Resources:
+  # ========================================
+  # Home
+  # ========================================
+
+  GetHomeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: src/handlers/home/get-home.handler
+      Runtime: nodejs22.x
+
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MealPlansTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RecipesTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ShoppingListsTable
+
+      Environment:
+        Variables:
+          NODE_ENV: development
+          MEALPLAN_TABLE_NAME: !Ref MealPlansTable
+          RECIPES_TABLE_NAME: !Ref RecipesTable
+          SHOPPING_LISTS_TABLE_NAME: !Ref ShoppingListsTable
+      Events:
+        GetHome:
+          Type: Api
+          Properties:
+            Path: /home
+            Method: get
+
+  # ========================================
+  # Recipe
+  # ========================================
+
+  GetRecipesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: src/handlers/recipe/get-recipes.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RecipesTable
+      Environment:
+        Variables:
+          NODE_ENV: development
+          RECIPES_TABLE_NAME: !Ref RecipesTable
+      Events:
+        GetRecipes:
+          Type: Api
+          Properties:
+            Path: /recipes
+            Method: get
+
+  GetRecipeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: src/handlers/recipe/get-recipe.handler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref RecipesTable
+      Environment:
+        Variables:
+          NODE_ENV: development
+          RECIPES_TABLE_NAME: !Ref RecipesTable
+      Events:
+        GetRecipe:
+          Type: Api
+          Properties:
+            Path: /recipes/{recipeId}
+            Method: get
+
+  CreateRecipeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: src/handlers/recipe/create-recipe.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RecipesTable
+      Environment:
+        Variables:
+          NODE_ENV: development
+          RECIPES_TABLE_NAME: !Ref RecipesTable
+      Events:
+        CreateRecipe:
+          Type: Api
+          Properties:
+            Path: /recipes
+            Method: post
+
+  UpdateRecipeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: src/handlers/recipe/update-recipe.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RecipesTable
+      Environment:
+        Variables:
+          NODE_ENV: development
+          RECIPES_TABLE_NAME: !Ref RecipesTable
+      Events:
+        UpdateRecipe:
+          Type: Api
+          Properties:
+            Path: /recipes/{recipeId}
+            Method: put
+
+  DeleteRecipeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: src/handlers/recipe/delete-recipe.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RecipesTable
+      Environment:
+        Variables:
+          NODE_ENV: development
+          RECIPES_TABLE_NAME: !Ref RecipesTable
+      Events:
+        DeleteRecipe:
+          Type: Api
+          Properties:
+            Path: /recipes/{recipeId}
+            Method: delete
+
+  # ========================================
+  # Category
+  # ========================================
+
+  GetCategoriesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: src/handlers/category/get-categories.handler
+      Events:
+        GetCategories:
+          Type: Api
+          Properties:
+            Path: /categories
+            Method: get
+
+  CreateCategoryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: src/handlers/category/create-category.handler
+      Events:
+        CreateCategory:
+          Type: Api
+          Properties:
+            Path: /categories
+            Method: post
+
+  UpdateCategoryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: src/handlers/category/update-category.handler
+      Events:
+        UpdateCategory:
+          Type: Api
+          Properties:
+            Path: /categories/{categoryId}
+            Method: put
+
+  DeleteCategoryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: src/handlers/category/delete-category.handler
+      Events:
+        DeleteCategory:
+          Type: Api
+          Properties:
+            Path: /categories/{categoryId}
+            Method: delete
+
+  # ========================================
+  # MealPlan
+  # ========================================
+
+  GetMealPlansFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: src/handlers/meal-plan/get-meal-plans.handler
+      Events:
+        GetMealPlans:
+          Type: Api
+          Properties:
+            Path: /meal-plans
+            Method: get
+
+  UpsertMealPlanFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: src/handlers/meal-plan/upsert-meal-plan.handler
+      Events:
+        UpsertMealPlan:
+          Type: Api
+          Properties:
+            Path: /meal-plans
+            Method: put
+
+  DeleteMealPlanFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: src/handlers/meal-plan/delete-meal-plan.handler
+      Events:
+        DeleteMealPlan:
+          Type: Api
+          Properties:
+            Path: /meal-plans/{mealPlanId}
+            Method: delete
+
+  # ========================================
+  # Shopping
+  # ========================================
+
+  GetShoppingFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: src/handlers/shopping/get-shopping.handler
+      Events:
+        GetShopping:
+          Type: Api
+          Properties:
+            Path: /shopping
+            Method: get
+
+  UpdateShoppingFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: src/handlers/shopping/update-shopping.handler
+      Events:
+        UpdateShopping:
+          Type: Api
+          Properties:
+            Path: /shopping
+            Method: put
+
+  RegenerateShoppingFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: src/handlers/shopping/regenerate-shopping.handler
+      Events:
+        RegenerateShopping:
+          Type: Api
+          Properties:
+            Path: /shopping/regenerate
+            Method: post
+
+  ## ========================================
+  # SampleTable
+  # ========================================
+  UsersTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: !Sub "${AWS::StackName}-Users"
+      BillingMode: PAY_PER_REQUEST
+      SSESpecification:
+        SSEEnabled: true
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+
+  RecipesTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: !Sub "${AWS::StackName}-Recipes"
+      BillingMode: PAY_PER_REQUEST
+      SSESpecification:
+        SSEEnabled: true
+      AttributeDefinitions:
+        - AttributeName: recipeId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: recipeId
+          KeyType: HASH
+
+  CategoriesTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: !Sub "${AWS::StackName}-Categories"
+      BillingMode: PAY_PER_REQUEST
+      SSESpecification:
+        SSEEnabled: true
+      AttributeDefinitions:
+        - AttributeName: categoryId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: categoryId
+          KeyType: HASH
+
+  MealPlansTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: !Sub "${AWS::StackName}-MealPlans"
+      BillingMode: PAY_PER_REQUEST
+      SSESpecification:
+        SSEEnabled: true
+      AttributeDefinitions:
+        - AttributeName: mealPlanId
+          AttributeType: S
+        - AttributeName: userId
+          AttributeType: S
+        - AttributeName: mealDate
+          AttributeType: S
+      KeySchema:
+        - AttributeName: mealPlanId
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: UserMealDateIndex
+          KeySchema:
+            - AttributeName: userId
+              KeyType: HASH
+            - AttributeName: mealDate
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+
+  ShoppingListsTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: !Sub "${AWS::StackName}-ShoppingLists"
+      BillingMode: PAY_PER_REQUEST
+      SSESpecification:
+        SSEEnabled: true
+      AttributeDefinitions:
+        - AttributeName: shoppingId
+          AttributeType: S
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: shoppingId
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: UserIndex
+          KeySchema:
+            - AttributeName: userId
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+
+Outputs:
+  ApiUrl:
+    Description: MenuMate API Gateway endpoint
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
