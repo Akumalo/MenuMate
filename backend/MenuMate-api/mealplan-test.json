@@ -1,0 +1,14 @@
+{
+  "mealPlanId": {
+    "S": "mealplan-test-001"
+  },
+  "date": {
+    "S": "2026-08-29"
+  },
+  "mealType": {
+    "S": "dinner"
+  },
+  "recipeId": {
+    "S": "recipe-001"
+  }
+}

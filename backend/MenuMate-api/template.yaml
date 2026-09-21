@@ -206,6 +206,12 @@ Resources:
     Properties:
       CodeUri: ./
       Handler: src/handlers/meal-plan/get-meal-plans.handler
+      Environment:
+        Variables:
+          MEALPLAN_TABLE_NAME: !Ref MealPlansTable
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref MealPlansTable
       Events:
         GetMealPlans:
           Type: Api
@@ -218,6 +224,12 @@ Resources:
     Properties:
       CodeUri: ./
       Handler: src/handlers/meal-plan/upsert-meal-plan.handler
+      Environment:
+        Variables:
+          MEALPLAN_TABLE_NAME: !Ref MealPlansTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MealPlansTable
       Events:
         UpsertMealPlan:
           Type: Api
@@ -230,6 +242,12 @@ Resources:
     Properties:
       CodeUri: ./
       Handler: src/handlers/meal-plan/delete-meal-plan.handler
+      Environment:
+        Variables:
+          MEALPLAN_TABLE_NAME: !Ref MealPlansTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MealPlansTable
       Events:
         DeleteMealPlan:
           Type: Api
@@ -337,22 +355,25 @@ Resources:
       BillingMode: PAY_PER_REQUEST
       SSESpecification:
         SSEEnabled: true
+
       AttributeDefinitions:
         - AttributeName: mealPlanId
           AttributeType: S
-        - AttributeName: userId
+        - AttributeName: date
           AttributeType: S
-        - AttributeName: mealDate
+        - AttributeName: mealType
           AttributeType: S
+
       KeySchema:
         - AttributeName: mealPlanId
           KeyType: HASH
+
       GlobalSecondaryIndexes:
-        - IndexName: UserMealDateIndex
+        - IndexName: date-index
           KeySchema:
-            - AttributeName: userId
+            - AttributeName: date
               KeyType: HASH
-            - AttributeName: mealDate
+            - AttributeName: mealType
               KeyType: RANGE
           Projection:
             ProjectionType: ALL
