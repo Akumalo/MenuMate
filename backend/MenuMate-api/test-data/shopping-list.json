@@ -1,0 +1,31 @@
+{
+  "shoppingId": "shopping-001",
+  "userId": "user-001",
+  "items": [
+    {
+      "shoppingItemId": "item-001",
+      "mealPlanId": "2026-08-29-breakfast",
+      "name": "玉ねぎ",
+      "amount": 2,
+      "unit": "個",
+      "checked": false
+    },
+    {
+      "shoppingItemId": "item-002",
+      "mealPlanId": "2026-08-29-dinner",
+      "name": "鶏もも肉",
+      "amount": 300,
+      "unit": "g",
+      "checked": false
+    },
+    {
+      "shoppingItemId": "item-003",
+      "mealPlanId": "2026-08-29-dinner",
+      "name": "醤油",
+      "amount": 30,
+      "unit": "ml",
+      "checked": true
+    }
+  ],
+  "createdAt": "2026-08-29T10:00:00Z"
+}
