@@ -264,6 +264,12 @@ Resources:
     Properties:
       CodeUri: ./
       Handler: src/handlers/shopping/get-shopping.handler
+      Environment:
+        Variables:
+          SHOPPING_LISTS_TABLE_NAME: !Ref ShoppingListsTable
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref ShoppingListsTable
       Events:
         GetShopping:
           Type: Api
@@ -276,11 +282,17 @@ Resources:
     Properties:
       CodeUri: ./
       Handler: src/handlers/shopping/update-shopping.handler
+      Environment:
+        Variables:
+          SHOPPING_LISTS_TABLE_NAME: !Ref ShoppingListsTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ShoppingListsTable
       Events:
         UpdateShopping:
           Type: Api
           Properties:
-            Path: /shopping
+            Path: /shopping/{shoppingItemId}
             Method: put
 
   RegenerateShoppingFunction:
@@ -288,6 +300,18 @@ Resources:
     Properties:
       CodeUri: ./
       Handler: src/handlers/shopping/regenerate-shopping.handler
+      Environment:
+        Variables:
+          MEALPLAN_TABLE_NAME: !Ref MealPlansTable
+          RECIPES_TABLE_NAME: !Ref RecipesTable
+          SHOPPING_LISTS_TABLE_NAME: !Ref ShoppingListsTable
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref MealPlansTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref RecipesTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ShoppingListsTable
       Events:
         RegenerateShopping:
           Type: Api
@@ -355,29 +379,25 @@ Resources:
       BillingMode: PAY_PER_REQUEST
       SSESpecification:
         SSEEnabled: true
-
       AttributeDefinitions:
         - AttributeName: mealPlanId
           AttributeType: S
-        - AttributeName: date
+        - AttributeName: userId
           AttributeType: S
-        - AttributeName: mealType
+        - AttributeName: mealDate
           AttributeType: S
-
       KeySchema:
         - AttributeName: mealPlanId
           KeyType: HASH
-
       GlobalSecondaryIndexes:
-        - IndexName: date-index
+        - IndexName: UserMealDateIndex
           KeySchema:
-            - AttributeName: date
+            - AttributeName: userId
               KeyType: HASH
-            - AttributeName: mealType
+            - AttributeName: mealDate
               KeyType: RANGE
           Projection:
             ProjectionType: ALL
-
   ShoppingListsTable:
     Type: AWS::DynamoDB::Table
     DeletionPolicy: Retain

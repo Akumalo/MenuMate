@@ -4,16 +4,16 @@ export const handler = async (event) => {
   try {
     const body = JSON.parse(event.body ?? "{}");
 
-    const { date, mealType, recipeId } = body;
+    const { mealDate, mealType, recipeId } = body;
 
-    if (!date || !mealType || !recipeId) {
+    if (!mealDate || !mealType || !recipeId) {
       return {
         statusCode: 400,
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          message: "date, mealType, and recipeId are required",
+          message: "mealDate, mealType, and recipeId are required",
         }),
       };
     }
@@ -30,7 +30,15 @@ export const handler = async (event) => {
       };
     }
 
-    const mealPlan = await upsertMealPlan({ date, mealType, recipeId });
+    // TODO: 認証実装後はログインユーザーのuserIdを取得する
+    const userId = "user-001";
+
+    const mealPlan = await upsertMealPlan({
+      userId,
+      mealDate,
+      mealType,
+      recipeId,
+    });
 
     return {
       statusCode: 200,

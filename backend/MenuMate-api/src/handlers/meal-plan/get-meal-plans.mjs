@@ -1,11 +1,10 @@
-import { getMealPlansByDate } from "../repositories/meal-plan-repository.mjs";
+import { getMealPlansByUserAndDate } from "../repositories/meal-plan-repository.mjs";
 
 export const handler = async (event) => {
   try {
     console.log("event:", JSON.stringify(event));
 
     const date = event.queryStringParameters?.date;
-
     console.log("date:", date);
 
     if (!date) {
@@ -20,7 +19,10 @@ export const handler = async (event) => {
       };
     }
 
-    const mealPlans = await getMealPlansByDate(date);
+    // TODO: 認証実装後はログインユーザーのuserIdを取得する
+    const userId = "user-001";
+
+    const mealPlans = await getMealPlansByUserAndDate(userId, date);
 
     console.log("mealPlans:", JSON.stringify(mealPlans));
 

@@ -971,15 +971,23 @@ components:
       type: object
       properties:
         shoppingItemId:
-          type: integer
-        ingredientName:
           type: string
+          description: 買い物項目ID
+        mealPlanId:
+          type: string
+          description: 材料の元となった献立ID
+        name:
+          type: string
+          description: 食材名
         amount:
+          type: number
+          description: 数量
+        unit:
           type: string
+          description: 単位
         checked:
           type: boolean
-        categoryName:
-          type: string
+          description: 購入済みフラグ
 
     ShoppingListResponse:
       type: object

@@ -1,0 +1,81 @@
+{
+  "shoppingId": {
+    "S": "shopping-001"
+  },
+  "userId": {
+    "S": "user-001"
+  },
+  "items": {
+    "L": [
+      {
+        "M": {
+          "shoppingItemId": {
+            "S": "item-001"
+          },
+          "mealPlanId": {
+            "S": "2026-08-29-breakfast"
+          },
+          "name": {
+            "S": "onion"
+          },
+          "amount": {
+            "N": "2"
+          },
+          "unit": {
+            "S": "pcs"
+          },
+          "checked": {
+            "BOOL": false
+          }
+        }
+      },
+      {
+        "M": {
+          "shoppingItemId": {
+            "S": "item-002"
+          },
+          "mealPlanId": {
+            "S": "2026-08-29-dinner"
+          },
+          "name": {
+            "S": "chicken"
+          },
+          "amount": {
+            "N": "300"
+          },
+          "unit": {
+            "S": "g"
+          },
+          "checked": {
+            "BOOL": false
+          }
+        }
+      },
+      {
+        "M": {
+          "shoppingItemId": {
+            "S": "item-003"
+          },
+          "mealPlanId": {
+            "S": "2026-08-29-dinner"
+          },
+          "name": {
+            "S": "soy sauce"
+          },
+          "amount": {
+            "N": "30"
+          },
+          "unit": {
+            "S": "ml"
+          },
+          "checked": {
+            "BOOL": true
+          }
+        }
+      }
+    ]
+  },
+  "createdAt": {
+    "S": "2026-08-29T10:00:00Z"
+  }
+}

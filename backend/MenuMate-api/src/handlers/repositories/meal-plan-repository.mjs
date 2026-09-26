@@ -1,4 +1,5 @@
 import { DeleteCommand, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
+
 import { dynamoDb } from "../../lib/dynamodb.mjs";
 
 const tableName = process.env.MEALPLAN_TABLE_NAME;
@@ -19,25 +20,17 @@ export async function getMealPlansByUserAndDate(userId, mealDate) {
   return result.Items ?? [];
 }
 
-export async function getMealPlansByDate(date) {
-  console.log("Query date:", date);
-  console.log("Table:", tableName);
-
+export async function getMealPlansByUser(userId) {
   const command = new QueryCommand({
     TableName: tableName,
-    IndexName: "date-index",
-    KeyConditionExpression: "#date = :date",
-    ExpressionAttributeNames: {
-      "#date": "date",
-    },
+    IndexName: "UserMealDateIndex",
+    KeyConditionExpression: "userId = :userId",
     ExpressionAttributeValues: {
-      ":date": date,
+      ":userId": userId,
     },
   });
 
   const result = await dynamoDb.send(command);
-
-  console.log("Query result:", JSON.stringify(result));
 
   return result.Items ?? [];
 }
@@ -53,25 +46,24 @@ export async function deleteMealPlan(mealPlanId) {
   await dynamoDb.send(command);
 }
 
-export async function upsertMealPlan({ date, mealType, recipeId }) {
-  const mealPlanId = `${date}-${mealType}`;
+export async function upsertMealPlan({ userId, mealDate, mealType, recipeId }) {
+  const mealPlanId = `${mealDate}-${mealType}`;
+
+  const mealPlan = {
+    mealPlanId,
+    userId,
+    mealDate,
+    mealType,
+    recipeId,
+    createdAt: new Date().toISOString(),
+  };
 
   const command = new PutCommand({
     TableName: tableName,
-    Item: {
-      mealPlanId,
-      date,
-      mealType,
-      recipeId,
-    },
+    Item: mealPlan,
   });
 
   await dynamoDb.send(command);
 
-  return {
-    mealPlanId,
-    date,
-    mealType,
-    recipeId,
-  };
+  return mealPlan;
 }
